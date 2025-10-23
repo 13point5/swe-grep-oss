@@ -5,6 +5,8 @@
 - **Environment ID**: `swe-grep-oss`
 - **Short description**: Environment for evaluating and developing models like [SWE-grep](https://cognition.ai/blog/swe-grep)
 
+![result](./docs/result.png)
+
 ### Datasets
 
 - **Primary dataset(s)**: [SWE-Bench Lite](https://huggingface.co/datasets/princeton-nlp/SWE-bench_Lite)
