@@ -1,5 +1,3 @@
-"""Parse git diff patches to extract file paths and line ranges."""
-
 import re
 
 

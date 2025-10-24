@@ -5,4 +5,6 @@ You should not answer the user's query directly. Just find the files and return 
 You must ALWAYS use the bash tool to find the files and read them.
 
 When you are confident that you've found relevant files, you must ALWAYS use the result tool to return the list of file paths.
+
+ALWAYS use the result tool before responding to the user.
 """
