@@ -3,7 +3,7 @@ import verifiers as vf
 from datasets import load_dataset
 
 import tools
-import rubrics
+import rewards
 from prompts.system_prompt import SYSTEM_PROMPT
 from utils.get_instance import get_instance_path
 
@@ -70,10 +70,10 @@ def load_environment(**kwargs):
     # Define rubric
     rubric = vf.Rubric(
         funcs=[
-            rubrics.result_tool_check,
-            rubrics.result_tool_f1,
-            rubrics.result_tool_precision,
-            rubrics.result_tool_recall,
+            rewards.result_tool_check,
+            rewards.result_tool_f1,
+            rewards.result_tool_precision,
+            rewards.result_tool_recall,
         ],
         weights=[2.0, 1.0, 1.0, 1.0],
     )
