@@ -2,8 +2,8 @@ import verifiers as vf
 
 
 def get_result_tool_call(
-    messages: vf.types.Messages,
-) -> tuple[vf.types.ChatMessage | None, bool]:
+    messages: vf.Messages,
+) -> tuple[vf.ChatMessage | None, bool]:
     """
     Get the result tool call from the messages.
 

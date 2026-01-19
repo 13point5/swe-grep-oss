@@ -4,7 +4,7 @@ from utils.get_result_tool_call import get_result_tool_call
 
 
 def result_tool_check(
-    prompt, completion: vf.types.Messages, answer, state, task, info
+    prompt, completion: vf.Messages, answer, state, task, info
 ) -> float:
     """
     Check if the result tool call is successful.

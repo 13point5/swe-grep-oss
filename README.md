@@ -19,20 +19,13 @@
 
 ### Quickstart
 
-Clone a sample SWE-Bench Lite repository:
-
-```bash
-uv run scripts/clone_repos.py --max-repos 1 --max-instances 1
-```
-
-Run an evaluation with your model of choice:
+Run an evaluation with your model of choice (repos are cloned automatically and deleted after each rollout):
 
 ```bash
 uv run vf-eval swe-grep-oss \
-  --api-base-url https://generativelanguage.googleapis.com/v1beta/openai/ \
-  --header 'Content-Type: application/json' \
-  --api-key-var GEMINI_API_KEY \
-  --model "gemini-2.5-flash" \
-  --num-examples 1 \
+  --api-base-url https://api.openai.com/v1 \
+  --api-key-var OPENAI_API_KEY \
+  --model "gpt-4o-mini" \
+  --num-examples 2 \
   --rollouts-per-example 1
 ```

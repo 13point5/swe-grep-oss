@@ -9,7 +9,7 @@ from utils.result_tool_metrics import (
 
 
 def result_tool_f1(
-    prompt, completion: vf.types.Messages, answer, state, task, info
+    prompt, completion: vf.Messages, answer, state, task, info
 ) -> float:
     """
     Calculate file-level F1 score.

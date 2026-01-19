@@ -4,7 +4,7 @@ from utils.result_tool_metrics import calculate_precision, get_file_sets
 
 
 def result_tool_precision(
-    prompt, completion: vf.types.Messages, answer, state, task, info
+    prompt, completion: vf.Messages, answer, state, task, info
 ) -> float:
     """
     Calculate file-level precision.

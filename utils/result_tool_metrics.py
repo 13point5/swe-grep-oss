@@ -9,7 +9,7 @@ from utils.parse_patch import parse_patch
 
 
 def get_file_sets(
-    completion: vf.types.Messages, patch: str
+    completion: vf.Messages, patch: str
 ) -> tuple[set[str], set[str]] | tuple[None, None]:
     """
     Extract file sets from completion messages and patch.
