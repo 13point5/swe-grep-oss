@@ -1,42 +1,29 @@
 import verifiers as vf
 
+from utils.parse_file_list_xml import get_file_list_from_messages
 
-def get_result_tool_call(
+
+def get_file_list_result(
     messages: vf.Messages,
-) -> tuple[vf.ChatMessage | None, bool]:
+) -> tuple[list[str] | None, bool]:
     """
-    Get the result tool call from the messages.
+    Get the file list from the messages using XML format.
 
     Returns:
-        tuple: (result_tool_call, success) where success is True if there's a "Success" response
+        tuple: (file_paths, success) where success is True if valid file_list found
     """
+    return get_file_list_from_messages(messages)
 
-    # Find the result tool call
-    result_tool_call = None
-    for message in messages:
-        if message.get("role") == "assistant" and message.get("tool_calls"):
-            for tool_call in message["tool_calls"]:
-                # Check if it's a result tool call
-                if (
-                    hasattr(tool_call, "function")
-                    and tool_call.function.name == "result"
-                ):
-                    result_tool_call = tool_call
-                    break
-            if result_tool_call:
-                break
 
-    # Check if there's a corresponding tool response with "Success"
-    success = False
-    if result_tool_call:
-        for message in messages:
-            if (
-                message.get("role") == "tool"
-                and message.get("tool_call_id") == result_tool_call.id
-            ):
-                content = message.get("content", "")
-                if content == "Success":
-                    success = True
-                break
+# Keep old function for backwards compatibility but mark as deprecated
+def get_result_tool_call(
+    messages: vf.Messages,
+) -> tuple[list[str] | None, bool]:
+    """
+    DEPRECATED: Use get_file_list_result instead.
+    Get the file list from the messages using XML format.
 
-    return result_tool_call, success
+    Returns:
+        tuple: (file_paths, success) where success is True if valid file_list found
+    """
+    return get_file_list_from_messages(messages)

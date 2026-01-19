@@ -1,10 +1,8 @@
-"""Utility functions for calculating result tool metrics."""
-
-import json
+"""Utility functions for calculating result metrics."""
 
 import verifiers as vf
 
-from utils.get_result_tool_call import get_result_tool_call
+from utils.get_result_tool_call import get_file_list_result
 from utils.parse_patch import parse_patch
 
 
@@ -21,38 +19,23 @@ def get_file_sets(
     Returns:
         Tuple of (result_files, patch_files) or (None, None) if extraction fails
     """
-    result_tool_call, success = get_result_tool_call(completion)
+    file_paths, success = get_file_list_result(completion)
 
-    # If no successful result tool call, return None
-    if not success or not result_tool_call:
+    # If no successful file list extraction, return None
+    if not success or not file_paths:
         return None, None
 
     # Parse the patch to get file paths
     patch_info = parse_patch(patch)
     patch_files = set(patch_info.keys())
 
-    # Get file paths from the result tool call
-    try:
-        # Parse the arguments from the tool call
-        if hasattr(result_tool_call, "function") and hasattr(
-            result_tool_call.function, "arguments"
-        ):
-            args_str = result_tool_call.function.arguments
-            args = json.loads(args_str)
+    # Get file paths from the XML file list
+    result_files = set(file_paths)
 
-            # Get file paths from the result
-            result_files = set()
-            if "file_paths" in args:
-                result_files = set(args["file_paths"])
-
-            if not result_files:
-                return None, None
-
-            return result_files, patch_files
-    except (json.JSONDecodeError, AttributeError, KeyError):
+    if not result_files:
         return None, None
 
-    return None, None
+    return result_files, patch_files
 
 
 def calculate_precision(result_files: set[str], patch_files: set[str]) -> float:

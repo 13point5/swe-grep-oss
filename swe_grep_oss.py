@@ -7,6 +7,7 @@ import rewards
 from prompts.system_prompt import SYSTEM_PROMPT
 from utils.get_instance import get_instance_path
 from utils.repo_manager import clone_repo, delete_repo
+from utils.parse_file_list_xml import parse_file_list_xml
 
 
 logger = logging.getLogger("swe-grep-oss")
@@ -16,8 +17,8 @@ class SWEGrepEnv(vf.StatefulToolEnv):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # Only add bash tool - file list is returned via XML in the response
         self.add_tool(tools.bash, args_to_skip=["cwd"])
-        self.add_tool(tools.result)
 
     async def setup_state(self, state: vf.State) -> vf.State:
         """Clone the repository if it doesn't exist."""
@@ -42,6 +43,20 @@ class SWEGrepEnv(vf.StatefulToolEnv):
             if repo_path:
                 delete_repo(repo_path)
                 logger.info(f"Deleted cloned repo: {repo_path}")
+
+    @vf.stop
+    async def file_list_returned(self, state: vf.State) -> bool:
+        """Stop when the model returns a file_list XML."""
+        if len(state["trajectory"]) == 0:
+            return False
+        last_message = state["trajectory"][-1]["completion"][-1]
+        if last_message.get("role") != "assistant":
+            return False
+        content = last_message.get("content", "")
+        if isinstance(content, str) and "<file_list>" in content:
+            file_paths = parse_file_list_xml(content)
+            return file_paths is not None
+        return False
 
     def update_tool_args(
         self,
@@ -86,15 +101,16 @@ def load_environment(**kwargs):
         }
     )
 
-    # Define rubric
+    # Define rubric with format reward
     rubric = vf.Rubric(
         funcs=[
             rewards.result_tool_check,
             rewards.result_tool_f1,
             rewards.result_tool_precision,
             rewards.result_tool_recall,
+            rewards.file_list_format_reward,
         ],
-        weights=[2.0, 1.0, 1.0, 1.0],
+        weights=[2.0, 1.0, 1.0, 1.0, 1.0],
     )
 
     # Load environment

@@ -4,7 +4,13 @@ You should not answer the user's query directly. Just find the files and return 
 
 You must ALWAYS use the bash tool to find the files and read them.
 
-When you are confident that you've found relevant files, you must ALWAYS use the result tool to return the list of file paths.
+When you are confident that you've found relevant files, return the list of file paths using the following XML format:
 
-ALWAYS use the result tool before responding to the user.
+<file_list>
+path/to/file1.py
+path/to/file2.py
+path/to/file3.py
+</file_list>
+
+Each file path should be on its own line inside the <file_list> tags. Do not include any other text inside these tags, only file paths.
 """
