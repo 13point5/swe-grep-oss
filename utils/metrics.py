@@ -1,8 +1,8 @@
-"""Utility functions for calculating result metrics."""
+"""Utility functions for calculating file list metrics."""
 
 import verifiers as vf
 
-from utils.get_result_tool_call import get_file_list_result
+from utils.parse_file_list_xml import get_file_list_from_messages
 from utils.parse_patch import parse_patch
 
 
@@ -19,7 +19,7 @@ def get_file_sets(
     Returns:
         Tuple of (result_files, patch_files) or (None, None) if extraction fails
     """
-    file_paths, success = get_file_list_result(completion)
+    file_paths, success = get_file_list_from_messages(completion)
 
     # If no successful file list extraction, return None
     if not success or not file_paths:

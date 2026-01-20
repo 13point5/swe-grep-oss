@@ -101,16 +101,15 @@ def load_environment(**kwargs):
         }
     )
 
-    # Define rubric with format reward
+    # Define rubric
     rubric = vf.Rubric(
         funcs=[
-            rewards.result_tool_check,
-            rewards.result_tool_f1,
-            rewards.result_tool_precision,
-            rewards.result_tool_recall,
-            rewards.file_list_format_reward,
+            rewards.file_list_check,
+            rewards.f1_reward,
+            rewards.precision_reward,
+            rewards.recall_reward,
         ],
-        weights=[2.0, 1.0, 1.0, 1.0, 1.0],
+        weights=[2.0, 1.0, 1.0, 1.0],
     )
 
     # Load environment
