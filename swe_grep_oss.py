@@ -83,11 +83,44 @@ class SWEGrepEnv(vf.StatefulToolEnv):
         return tool_args
 
 
-def load_environment(**kwargs):
-    """Load and configure the environment."""
+DATASET_CONFIGS = {
+    "swe-bench-lite": {
+        "path": "princeton-nlp/SWE-bench_Lite",
+        "split": "test",
+    },
+    "swe-gym": {
+        "path": "SWE-Gym/SWE-Gym",
+        "split": "train",
+    },
+    "swe-gym-lite": {
+        "path": "SWE-Gym/SWE-Gym-Lite",
+        "split": "train",
+    },
+    "swe-gym-raw": {
+        "path": "SWE-Gym/SWE-Gym-Raw",
+        "split": "train",
+    },
+}
 
-    # Load dataset
-    dataset = load_dataset("princeton-nlp/SWE-bench_Lite", split="test")
+
+def load_environment(dataset_name: str = "swe-bench-lite", **kwargs):
+    """Load and configure the environment.
+
+    Args:
+        dataset_name: Which dataset to use. Options:
+            - "swe-bench-lite": SWE-bench Lite (300 instances)
+            - "swe-gym": SWE-Gym (2,438 instances)
+            - "swe-gym-lite": SWE-Gym Lite (230 instances)
+            - "swe-gym-raw": SWE-Gym Raw (64,689 instances)
+        **kwargs: Additional arguments passed to SWEGrepEnv
+    """
+    if dataset_name not in DATASET_CONFIGS:
+        raise ValueError(
+            f"Unknown dataset: {dataset_name}. Available: {list(DATASET_CONFIGS.keys())}"
+        )
+
+    config = DATASET_CONFIGS[dataset_name]
+    dataset = load_dataset(config["path"], split=config["split"])
     dataset = dataset.map(
         lambda row: {
             # we can add metadata related to the dataset row here

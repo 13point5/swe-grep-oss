@@ -61,6 +61,24 @@ path/to/file3.py
 - Whitespace around paths is trimmed
 - The parser uses the **last** occurrence if multiple `<file_list>` blocks exist
 
+## Dataset Options
+
+The `load_environment` function supports multiple datasets:
+
+```python
+# Default: SWE-bench Lite
+env = load_environment(dataset_name="swe-bench-lite")
+
+# SWE-Gym (2,438 instances)
+env = load_environment(dataset_name="swe-gym")
+
+# SWE-Gym Lite (230 instances)
+env = load_environment(dataset_name="swe-gym-lite")
+
+# SWE-Gym Raw (64,689 instances)
+env = load_environment(dataset_name="swe-gym-raw")
+```
+
 ## Rubric Configuration
 
 The rubric in `swe_grep_oss.py` uses these rewards:
