@@ -1,9 +1,9 @@
 import verifiers as vf
 
-from utils.result_tool_metrics import calculate_precision, get_file_sets
+from utils.metrics import calculate_precision, get_file_sets
 
 
-def result_tool_precision(
+def precision_reward(
     prompt, completion: vf.Messages, answer, state, task, info
 ) -> float:
     """

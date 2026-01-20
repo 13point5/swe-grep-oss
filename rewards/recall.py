@@ -1,9 +1,9 @@
 import verifiers as vf
 
-from utils.result_tool_metrics import calculate_recall, get_file_sets
+from utils.metrics import calculate_recall, get_file_sets
 
 
-def result_tool_recall(
+def recall_reward(
     prompt, completion: vf.Messages, answer, state, task, info
 ) -> float:
     """

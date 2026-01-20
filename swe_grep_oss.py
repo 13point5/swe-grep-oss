@@ -7,6 +7,7 @@ import rewards
 from prompts.system_prompt import SYSTEM_PROMPT
 from utils.get_instance import get_instance_path
 from utils.repo_manager import clone_repo, delete_repo
+from utils.parse_file_list_xml import parse_file_list_xml
 
 
 logger = logging.getLogger("swe-grep-oss")
@@ -16,8 +17,8 @@ class SWEGrepEnv(vf.StatefulToolEnv):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # Only add bash tool - file list is returned via XML in the response
         self.add_tool(tools.bash, args_to_skip=["cwd"])
-        self.add_tool(tools.result)
 
     async def setup_state(self, state: vf.State) -> vf.State:
         """Clone the repository if it doesn't exist."""
@@ -42,6 +43,20 @@ class SWEGrepEnv(vf.StatefulToolEnv):
             if repo_path:
                 delete_repo(repo_path)
                 logger.info(f"Deleted cloned repo: {repo_path}")
+
+    @vf.stop
+    async def file_list_returned(self, state: vf.State) -> bool:
+        """Stop when the model returns a file_list XML."""
+        if len(state["trajectory"]) == 0:
+            return False
+        last_message = state["trajectory"][-1]["completion"][-1]
+        if last_message.get("role") != "assistant":
+            return False
+        content = last_message.get("content", "")
+        if isinstance(content, str) and "<file_list>" in content:
+            file_paths = parse_file_list_xml(content)
+            return file_paths is not None
+        return False
 
     def update_tool_args(
         self,
@@ -68,11 +83,44 @@ class SWEGrepEnv(vf.StatefulToolEnv):
         return tool_args
 
 
-def load_environment(**kwargs):
-    """Load and configure the environment."""
+DATASET_CONFIGS = {
+    "swe-bench-lite": {
+        "path": "princeton-nlp/SWE-bench_Lite",
+        "split": "test",
+    },
+    "swe-gym": {
+        "path": "SWE-Gym/SWE-Gym",
+        "split": "train",
+    },
+    "swe-gym-lite": {
+        "path": "SWE-Gym/SWE-Gym-Lite",
+        "split": "train",
+    },
+    "swe-gym-raw": {
+        "path": "SWE-Gym/SWE-Gym-Raw",
+        "split": "train",
+    },
+}
 
-    # Load dataset
-    dataset = load_dataset("princeton-nlp/SWE-bench_Lite", split="test")
+
+def load_environment(dataset_name: str = "swe-bench-lite", **kwargs):
+    """Load and configure the environment.
+
+    Args:
+        dataset_name: Which dataset to use. Options:
+            - "swe-bench-lite": SWE-bench Lite (300 instances)
+            - "swe-gym": SWE-Gym (2,438 instances)
+            - "swe-gym-lite": SWE-Gym Lite (230 instances)
+            - "swe-gym-raw": SWE-Gym Raw (64,689 instances)
+        **kwargs: Additional arguments passed to SWEGrepEnv
+    """
+    if dataset_name not in DATASET_CONFIGS:
+        raise ValueError(
+            f"Unknown dataset: {dataset_name}. Available: {list(DATASET_CONFIGS.keys())}"
+        )
+
+    config = DATASET_CONFIGS[dataset_name]
+    dataset = load_dataset(config["path"], split=config["split"])
     dataset = dataset.map(
         lambda row: {
             # we can add metadata related to the dataset row here
@@ -89,10 +137,10 @@ def load_environment(**kwargs):
     # Define rubric
     rubric = vf.Rubric(
         funcs=[
-            rewards.result_tool_check,
-            rewards.result_tool_f1,
-            rewards.result_tool_precision,
-            rewards.result_tool_recall,
+            rewards.file_list_check,
+            rewards.f1_reward,
+            rewards.precision_reward,
+            rewards.recall_reward,
         ],
         weights=[2.0, 1.0, 1.0, 1.0],
     )

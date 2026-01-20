@@ -1,6 +1,6 @@
 import verifiers as vf
 
-from utils.result_tool_metrics import (
+from utils.metrics import (
     calculate_f1,
     calculate_precision,
     calculate_recall,
@@ -8,9 +8,7 @@ from utils.result_tool_metrics import (
 )
 
 
-def result_tool_f1(
-    prompt, completion: vf.Messages, answer, state, task, info
-) -> float:
+def f1_reward(prompt, completion: vf.Messages, answer, state, task, info) -> float:
     """
     Calculate file-level F1 score.
 
