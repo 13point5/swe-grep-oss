@@ -1,0 +1,4 @@
+[grpo-f1]
+description = "GRPO reinforcement learning with just the F1 reward"
+config = "configs/grpo-f1.toml"
+
