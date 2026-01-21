@@ -2,3 +2,10 @@
 description = "GRPO reinforcement learning with just the F1 reward"
 config = "configs/grpo-f1.toml"
 
+[grpo-f1-precision-recall]
+description = "GRPO reinforcement learning with F1, precision and recall rewards"
+config = "configs/grpo-f1-precision-recall.toml"
+
+[grpo-f1-format]
+description = "GRPO reinforcement learning with F1, and file list format rewards"
+config = "configs/grpo-f1-format.toml"
