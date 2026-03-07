@@ -9,6 +9,10 @@ gpus_per_node = 2
 [model]
 name = "Qwen/Qwen3-4B-Instruct-2507"
 
+[wandb]
+project = "swe-grep-oss"
+name = "grpo-f1"
+
 [trainer.optim]
 lr = 1e-5
 weight_decay = 0.0
