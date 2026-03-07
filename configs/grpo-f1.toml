@@ -1,0 +1,22 @@
+model = "PrimeIntellect/INTELLECT-3"
+max_steps = 200
+batch_size = 512
+rollouts_per_example = 16
+learning_rate = 1e-5
+lora_alpha = 32
+env_file = ["../.env"]
+
+[wandb]
+entity = "13point5-labs"
+project = "swe-grep-oss-rl"
+name = "swe-grep-oss-f1"
+
+[sampling]
+max_tokens = 5000
+
+[val]
+interval = 50
+num_examples = 16
+
+[[env]]
+id = "swe-grep-oss"

@@ -142,7 +142,7 @@ def load_environment(dataset_name: str = "swe-bench-lite", **kwargs):
             rewards.precision_reward,
             rewards.recall_reward,
         ],
-        weights=[2.0, 1.0, 1.0, 1.0],
+        weights=[1.0, 1.0, 0.0, 0.0],
     )
 
     # Load environment
