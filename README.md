@@ -21,6 +21,10 @@
 
 Run an evaluation with your model of choice (repos are cloned automatically and deleted after each rollout):
 
+- Default rollout clone root: system temp directory under `swe-grep-oss-repos`
+- Rollout directories are unique per rollout and look like `<repo>_<instance_id>_<random_suffix>`
+- Repositories are cloned directly at the target commit with `git clone --revision <sha> --depth 1`
+
 ```bash
 uv run vf-eval swe-grep-oss \
   --api-base-url https://api.openai.com/v1 \

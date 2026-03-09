@@ -5,7 +5,6 @@ from datasets import load_dataset
 import tools
 import rewards
 from prompts.system_prompt import SYSTEM_PROMPT
-from utils.get_instance import get_instance_path
 from utils.repo_manager import clone_repo, delete_repo
 from utils.parse_file_list_xml import parse_file_list_xml
 
@@ -21,28 +20,30 @@ class SWEGrepEnv(vf.StatefulToolEnv):
         self.add_tool(tools.bash, args_to_skip=["cwd"])
 
     async def setup_state(self, state: vf.State) -> vf.State:
-        """Clone the repository if it doesn't exist."""
+        """Clone the repository into a rollout-specific directory."""
         info = state["info"]
-        repo_path, was_cloned = clone_repo(
+        repo_path = clone_repo(
             repo_name=info["repo"],
             commit_id=info["base_commit"],
             instance_id=info["instance_id"],
         )
-        # Track whether we cloned it so we know to clean up later
         state["_repo_path"] = str(repo_path)
-        state["_repo_was_cloned"] = was_cloned
-        if was_cloned:
-            logger.info(f"Cloned {info['repo']} for {info['instance_id']}")
+        logger.info(
+            "Cloned %s for %s into %s (clone root: %s)",
+            info["repo"],
+            info["instance_id"],
+            repo_path,
+            repo_path.parent,
+        )
         return state
 
     @vf.cleanup
     async def cleanup_repo(self, state: vf.State):
-        """Delete the repository if we cloned it during this run."""
-        if state.get("_repo_was_cloned", False):
-            repo_path = state.get("_repo_path")
-            if repo_path:
-                delete_repo(repo_path)
-                logger.info(f"Deleted cloned repo: {repo_path}")
+        """Delete the rollout-specific cloned repository."""
+        repo_path = state.get("_repo_path")
+        if repo_path:
+            delete_repo(repo_path)
+            logger.info(f"Deleted cloned repo: {repo_path}")
 
     @vf.stop
     async def file_list_returned(self, state: vf.State) -> bool:
@@ -67,14 +68,10 @@ class SWEGrepEnv(vf.StatefulToolEnv):
         **kwargs,
     ) -> dict:
         if tool_name == "bash":
-            # Use the repo path from state if available, otherwise fall back to get_instance_path
             repo_path = state.get("_repo_path")
             if not repo_path:
-                repo_path = get_instance_path(
-                    {
-                        "repo": state["info"]["repo"],
-                        "instance_id": state["info"]["instance_id"],
-                    }
+                raise RuntimeError(
+                    "Repository path missing from state. setup_state must run before tool use."
                 )
             updated_tool_args = dict(tool_args)
             updated_tool_args["cwd"] = repo_path
