@@ -18,9 +18,9 @@ name = "swe-gym-lora-128-batch-128"
 entity = "13point5-labs"
 
 [val]
-num_examples = 100
-rollouts_per_example = 3
-interval = 10
+num_examples = 25
+rollouts_per_example = 1
+interval = 25
 
 [checkpoints]
 interval = 10
