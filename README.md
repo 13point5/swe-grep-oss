@@ -23,7 +23,7 @@ Run an evaluation with your model of choice (repos are cloned automatically and 
 
 - Default rollout clone root: system temp directory under `swe-grep-oss-repos`
 - Rollout directories are unique per rollout and look like `<repo>_<instance_id>_<random_suffix>`
-- Repositories are cloned directly at the target commit with `git clone --revision <sha> --depth 1`
+- Repositories are cloned directly at the target commit with `git clone --revision <sha> --depth 1` when supported, with a `git init` + `fetch` fallback for older Git versions
 
 ```bash
 uv run vf-eval swe-grep-oss \

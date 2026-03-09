@@ -6,6 +6,49 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+REVISION_UNSUPPORTED_ERRORS = (
+    "unknown option `revision'",
+    "unknown option 'revision'",
+)
+
+
+def _run_git(command: list[str], cwd: Path | None = None) -> None:
+    kwargs = {
+        "check": True,
+        "capture_output": True,
+        "text": True,
+    }
+    if cwd is not None:
+        kwargs["cwd"] = cwd
+    subprocess.run(command, **kwargs)
+
+
+def _clone_repo_with_revision(repo_url: str, commit_id: str, instance_path: Path) -> None:
+    _run_git(
+        [
+            "git",
+            "clone",
+            "--quiet",
+            "--revision",
+            commit_id,
+            "--depth",
+            "1",
+            repo_url,
+            str(instance_path),
+        ]
+    )
+
+
+def _clone_repo_with_fetch(repo_url: str, commit_id: str, instance_path: Path) -> None:
+    instance_path.mkdir(parents=True, exist_ok=False)
+    _run_git(["git", "init", "--quiet"], cwd=instance_path)
+    _run_git(["git", "remote", "add", "origin", repo_url], cwd=instance_path)
+    _run_git(["git", "fetch", "--depth", "1", "origin", commit_id], cwd=instance_path)
+    _run_git(
+        ["git", "-c", "advice.detachedHead=false", "checkout", "--quiet", "FETCH_HEAD"],
+        cwd=instance_path,
+    )
+
 
 def clone_repo(
     repo_name: str,
@@ -42,27 +85,29 @@ def clone_repo(
             f"Failed to allocate a unique clone directory for {repo_name} / {instance_id}"
         )
 
+    repo_url = f"https://github.com/{repo_name}.git"
     try:
         # Clone only the requested commit to keep checkout time and disk usage low.
-        subprocess.run(
-            [
-                "git",
-                "clone",
-                "--quiet",
-                "--revision",
-                commit_id,
-                "--depth",
-                "1",
-                f"https://github.com/{repo_name}.git",
-                str(instance_path),
-            ],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
+        _clone_repo_with_revision(repo_url, commit_id, instance_path)
         return instance_path
 
     except subprocess.CalledProcessError as e:
+        if any(message in (e.stderr or "") for message in REVISION_UNSUPPORTED_ERRORS):
+            if instance_path.exists():
+                shutil.rmtree(instance_path, ignore_errors=True)
+            try:
+                # Older Git builds may not support `git clone --revision`.
+                _clone_repo_with_fetch(repo_url, commit_id, instance_path)
+                return instance_path
+            except subprocess.CalledProcessError as fallback_error:
+                if instance_path.exists():
+                    shutil.rmtree(instance_path, ignore_errors=True)
+                raise RuntimeError(
+                    "Failed to clone "
+                    f"{repo_name} at {commit_id} with the compatibility fallback: "
+                    f"{fallback_error.stderr}"
+                )
+
         # Remove any partial checkout so failed rollouts do not leave broken directories behind.
         if instance_path.exists():
             shutil.rmtree(instance_path, ignore_errors=True)
