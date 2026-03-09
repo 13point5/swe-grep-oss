@@ -15,6 +15,7 @@ args = { dataset_name = "swe-gym" }
 [wandb]
 project = "swe-grep-prime-lab"
 name = "swe-gym-lora-128-batch-128"
+entity = "13point5-labs"
 
 [val]
 num_examples = 100
