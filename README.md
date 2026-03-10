@@ -24,6 +24,8 @@ Run an evaluation with your model of choice (repos are cloned automatically and 
 - Default rollout clone root: system temp directory under `swe-grep-oss-repos`
 - Rollout directories are unique per rollout and look like `<repo>_<instance_id>_<random_suffix>`
 - Repositories are cloned directly at the target commit with `git clone --revision <sha> --depth 1` when supported, with a `git init` + `fetch` fallback for older Git versions
+- Set `SWE_GREP_ENV_BACKEND=sandbox` to switch from the default local env to a sandbox-backed env
+- The sandbox variant uses a minimal public image (`python:3.11-slim`) with `1` CPU core, `2` GB RAM, and `5` GB disk, then installs `git`, `jq`, and `ripgrep` during setup before checking out the repo into `/workspace/repo`
 
 ```bash
 uv run vf-eval swe-grep-oss \
